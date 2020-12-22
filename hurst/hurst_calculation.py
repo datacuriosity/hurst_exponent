@@ -1,42 +1,36 @@
 from data_collection import collect_stock
-import numpy as np
-from sklearn.linear_model import LinearRegression
+from numpy import polyfit, subtract, var, log10
 
 
-def split_chunks(series_data, num_chunks):
+def hurst_ernie_chan(p, lags):
+    variancetau = []
+    tau = []
 
-    mean_rescaled_ranges = []
-    num_observations = []
-    for i in range(num_chunks):
-        series = np.array_split(series_data, 2**i)
-        num_observations.append(np.log(series[0].shape[0]))
-        rescaled_ranges = []
-        for arr in series:
-            mean = arr.mean()
-            std = np.std(arr)
+    for lag in lags:
+        #  Write the different lags into a vector to compute a set of tau or lags
+        tau.append(lag)
 
-            mean_adjusted = arr - mean
-            cumulative_deviation = np.cumsum(mean_adjusted)
-            range_R = cumulative_deviation.max() - cumulative_deviation.min()
+        # Compute the log returns on all days, then compute the variance on the difference in log returns
+        # call this pp or the price difference
+        pp = subtract(p[lag:], p[:-lag])
+        variancetau.append(var(pp))
 
-            rescaled_range = range_R / std
-            rescaled_ranges.append(rescaled_range)
+    # we now have a set of tau or lags and a corresponding set of variances.
+    # print tau
+    # print variancetau
 
-        mean_rescaled_ranges.append(np.log(np.mean(rescaled_ranges)))
+    # plot the log of those variance against the log of tau and get the slope
+    m = polyfit(log10(tau), log10(variancetau), 1)
 
-    return np.array(num_observations), np.array(mean_rescaled_ranges)
+    hurst = m[0] / 2
 
-
-def hurst_exp(log_num_observations, log_mean_rescaled_ranges):
-
-    linear = LinearRegression()
-    linear.fit(log_num_observations.reshape(-1, 1), log_mean_rescaled_ranges)
-    return linear.coef_[0]
+    return hurst
 
 
 if __name__ == '__main__':
     start_date = '2000-01-01'
     end_date = '2020-11-18'
     apple_stock = collect_stock('AAPL', start_date, end_date)
-    log_num_observations, log_mean_rescaled_ranges = split_chunks(apple_stock.Close.to_numpy(), 3)
-    hurst_ex = hurst_exp(log_num_observations, log_mean_rescaled_ranges)
+    lags = range(2, 20)
+
+    hurst_final = hurst_ernie_chan(list(apple_stock.Close.to_numpy()), lags)

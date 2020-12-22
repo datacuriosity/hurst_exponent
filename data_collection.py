@@ -38,17 +38,17 @@ def collect_crypto(id, time_frame='1d', trading_pair='LTC/BTC', start_date='2010
         li_df.append(df)
         start_date = (datetime.strptime(df.iloc[-1].name, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d')
 
-    df_final = pd.concat(li_df).to_csv(f"./data/crypto_{trading_pair.replace('/', '')}_from_{first_date}_to_{end_date}.csv")
+    df_final = pd.concat(li_df)
+    df_final.columns = ['Open', 'High', 'Low', 'Close', 'Volume']
     return df_final
 
 
 def collect_stock(tickers, start_date='2020-01-01', end_date='2020-11-08'):
     df = yf.download(tickers, start=start_date, end=end_date, progress=False)
-    # df.to_csv(f"./data/stock{tickers}_from_{start_date}_to_{end_date}.csv")
     return df
 
 
-def collect_fx(ccy_pair='USD/JPY', start_date='2000-01-01', end_date='2020-10-18'):
+def collect_fx(connection, ccy_pair='USD/JPY', start_date='2000-01-01', end_date='2020-10-18'):
     """
     Following this website https://fxcmpy.tpq.io/00_quick_start.html#
 
@@ -57,8 +57,8 @@ def collect_fx(ccy_pair='USD/JPY', start_date='2000-01-01', end_date='2020-10-18
     :param end_date:
     :return: DataFrame
     """
-    token = 'd0db1914c54a3c30c73256651cdb4ba76de20324'
-    connection = fxcmpy.fxcmpy(access_token=token, log_level='error')
+    # token = 'd0db1914c54a3c30c73256651cdb4ba76de20324'
+    # connection = fxcmpy.fxcmpy(access_token=token, log_level='error')
     df = connection.get_candles(ccy_pair, period='D1', start=start_date, end=end_date)
     df['Open'] = (df.bidopen + df.askopen) / 2
     df['High'] = (df.bidhigh + df.askhigh) / 2
@@ -66,7 +66,6 @@ def collect_fx(ccy_pair='USD/JPY', start_date='2000-01-01', end_date='2020-10-18
     df['Close'] = (df.bidclose + df.askclose) / 2
     df['Volume'] = df.tickqty
     new_df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
-    new_df.to_csv(f"./data/fx_{ccy_pair.replace('/', '')}_from_{start_date}_to_{end_date}.csv")
     return new_df
 
 
@@ -87,6 +86,6 @@ if __name__ == '__main__':
     # Collect stocks
     df_stock = collect_stock('AAPL', start_date, end_date)
 
-    # Collect FX
+    # # Collect FX
     df_fx = collect_fx(start_date=start_date, end_date=end_date)
     print("="*100 + "DONE" + "="*100)
