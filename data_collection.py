@@ -2,9 +2,7 @@ import ccxt
 from datetime import datetime, timedelta
 import fxcmpy
 import yfinance as yf
-import ray
-ray.init()
-import modin.pandas as pd
+import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
@@ -46,7 +44,7 @@ def collect_crypto(id, time_frame='1d', trading_pair='LTC/BTC', start_date='2010
 
 def collect_stock(tickers, start_date='2020-01-01', end_date='2020-11-08'):
     df = yf.download(tickers, start=start_date, end=end_date, progress=False)
-    df.to_csv(f"./data/stock{tickers}_from_{start_date}_to_{end_date}.csv")
+    # df.to_csv(f"./data/stock{tickers}_from_{start_date}_to_{end_date}.csv")
     return df
 
 
@@ -59,11 +57,17 @@ def collect_fx(ccy_pair='USD/JPY', start_date='2000-01-01', end_date='2020-10-18
     :param end_date:
     :return: DataFrame
     """
-    token = '865ea77124702adedb2f41c3602ef9c489440157'
+    token = 'd0db1914c54a3c30c73256651cdb4ba76de20324'
     connection = fxcmpy.fxcmpy(access_token=token, log_level='error')
     df = connection.get_candles(ccy_pair, period='D1', start=start_date, end=end_date)
-    df.to_csv(f"./data/crypto_{ccy_pair.replace('/', '')}_from_{start_date}_to_{end_date}.csv")
-    return df
+    df['Open'] = (df.bidopen + df.askopen) / 2
+    df['High'] = (df.bidhigh + df.askhigh) / 2
+    df['Low'] = (df.bidlow + df.asklow) / 2
+    df['Close'] = (df.bidclose + df.askclose) / 2
+    df['Volume'] = df.tickqty
+    new_df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
+    new_df.to_csv(f"./data/fx_{ccy_pair.replace('/', '')}_from_{start_date}_to_{end_date}.csv")
+    return new_df
 
 
 def plot_candlesticks(dates, open_data, high_data, low_data, close_data):
