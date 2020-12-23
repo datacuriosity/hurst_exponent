@@ -1,36 +1,31 @@
 from data_collection import collect_stock
-from numpy import polyfit, subtract, var, log10
+import numpy as np
 
 
-def hurst_ernie_chan(p, lags):
-    variancetau = []
-    tau = []
+def hurst(prices, lags):
 
-    for lag in lags:
-        #  Write the different lags into a vector to compute a set of tau or lags
-        tau.append(lag)
+    # Calculate the array of the variances of the lagged differences
+    tau = [np.sqrt(np.std(np.subtract(prices[lag:], prices[:-lag]))) for lag in lags]
 
-        # Compute the log returns on all days, then compute the variance on the difference in log returns
-        # call this pp or the price difference
-        pp = subtract(p[lag:], p[:-lag])
-        variancetau.append(var(pp))
+    # Use a linear fit to estimate the Hurst Exponent
+    poly = np.polyfit(np.log(lags), np.log(tau), 1)
 
-    # we now have a set of tau or lags and a corresponding set of variances.
-    # print tau
-    # print variancetau
-
-    # plot the log of those variance against the log of tau and get the slope
-    m = polyfit(log10(tau), log10(variancetau), 1)
-
-    hurst = m[0] / 2
-
-    return hurst
+    # Return the Hurst exponent from the polyfit output
+    return poly[0]*2.0
 
 
 if __name__ == '__main__':
-    start_date = '2000-01-01'
+    start_date = '2010-01-01'
     end_date = '2020-11-18'
     apple_stock = collect_stock('AAPL', start_date, end_date)
-    lags = range(2, 20)
 
-    hurst_final = hurst_ernie_chan(list(apple_stock.Close.to_numpy()), lags)
+    lags = range(2, 20)
+    gbm = np.log(np.cumsum(np.random.randn(100000)) + 1000)         # geometric brownian motion
+    mr = np.log(np.random.randn(100000) + 1000)                            # mean-reverting
+    tr = np.log(np.cumsum(np.random.randn(100000) + 1) + 1000)             # treding series
+
+    print(f'Hurst GBM: {hurst(gbm, lags)}')
+    print(f'Hurst mean-reverting: {hurst(mr, lags)}')
+    print(f'Hurst trending: {hurst(tr, lags)}')
+    print(f'Hurst AAPL {hurst(list(apple_stock.Close.to_numpy()), lags)}')
+

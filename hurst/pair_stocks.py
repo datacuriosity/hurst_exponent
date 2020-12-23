@@ -8,7 +8,7 @@ import fxcmpy
 import ccxt
 
 
-def find_cointegrated_pairs(data):
+def find_cointegrated_pairs(data, alpha=0.01):
     n = data.shape[1]
     score_matrix = np.zeros((n, n))
     p_value_matrix = np.ones((n, n))
@@ -22,7 +22,7 @@ def find_cointegrated_pairs(data):
             result = coint(s1, s2)
             score_matrix[i, j] = result[0]
             p_value_matrix[i, j] = result[1]
-            if result[1] < 0.01:
+            if result[1] < alpha:
                 pairs.append((keys[i], keys[j]))
     return score_matrix, p_value_matrix, pairs
 
