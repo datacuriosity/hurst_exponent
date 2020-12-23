@@ -57,8 +57,6 @@ def collect_fx(connection, ccy_pair='USD/JPY', start_date='2000-01-01', end_date
     :param end_date:
     :return: DataFrame
     """
-    # token = 'd0db1914c54a3c30c73256651cdb4ba76de20324'
-    # connection = fxcmpy.fxcmpy(access_token=token, log_level='error')
     df = connection.get_candles(ccy_pair, period='D1', start=start_date, end=end_date)
     df['Open'] = (df.bidopen + df.askopen) / 2
     df['High'] = (df.bidhigh + df.askhigh) / 2
@@ -86,6 +84,8 @@ if __name__ == '__main__':
     # Collect stocks
     df_stock = collect_stock('AAPL', start_date, end_date)
 
-    # # Collect FX
-    df_fx = collect_fx(start_date=start_date, end_date=end_date)
+    # Collect FX
+    token = 'd0db1914c54a3c30c73256651cdb4ba76de20324'
+    connection = fxcmpy.fxcmpy(access_token=token, log_level='error')
+    df_fx = collect_fx(connection, start_date=start_date, end_date=end_date)
     print("="*100 + "DONE" + "="*100)
