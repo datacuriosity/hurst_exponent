@@ -8,13 +8,13 @@ if __name__ == '__main__':
     cerebro = bt.Cerebro()
 
     data1 = bt.feeds.YahooFinanceCSVData(
-        dataname='data/stockAAPL_from_2000-01-01_to_2020-11-18.csv',
+        dataname='../data/stock_AAPL_2000-01-01_2020-11-18.csv',
         fromdate=datetime.datetime(2016, 1, 1),
         todate=datetime.datetime(2017, 12, 25),
     )
 
     data2 = bt.feeds.YahooFinanceCSVData(
-        dataname='TSLA.csv',
+        dataname='../data/stock_TSLA_2000-01-01_2020-11-18.csv',
         fromdate=datetime.datetime(2016, 1, 1),
         todate=datetime.datetime(2017, 12, 25),
     )

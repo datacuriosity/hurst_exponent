@@ -4,7 +4,7 @@ import fxcmpy
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
+#import plotly.graph_objects as go
 
 
 def collect_crypto(id, time_frame='1d', trading_pair='LTC/BTC', start_date='2010-01-01', end_date='2020-11-17'):
@@ -40,6 +40,8 @@ def collect_crypto(id, time_frame='1d', trading_pair='LTC/BTC', start_date='2010
 
     df_final = pd.concat(li_df)
     df_final.columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+    df_final['Adj Close'] = df_final['Close']
+    df_final = df_final[['Open', 'High', 'Low', 'Close','Adj Close', 'Volume']]
     return df_final
 
 
@@ -66,26 +68,27 @@ def collect_fx(connection, ccy_pair='USD/JPY', start_date='2000-01-01', end_date
     new_df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
     return new_df
 
-
-def plot_candlesticks(dates, open_data, high_data, low_data, close_data):
-    fig = go.Figure(data=[go.Candlestick(x=dates,
-                                         open=open_data, high=high_data,
-                                         low=low_data, close=close_data)])
-    fig.show()
-
-
 if __name__ == '__main__':
+    stock_symbols = ['AAPL', 'TSLA']
+    crypto_symbols = ['LTC/BTC']
+
     start_date = '2000-01-01'
     end_date = '2020-11-18'
     # Collect crypto
     id = ccxt.binance()
-    df_crypto = collect_crypto(id, start_date=start_date, end_date=end_date)
+
+    # collect crypto
+    for symbol in crypto_symbols:
+        df_crypto = collect_crypto(id, trading_pair=symbol, start_date=start_date, end_date=end_date)
+        df_crypto.to_csv("./data/crypto_" + symbol.replace("/", "-") + "_" + start_date + "_" + end_date + ".csv")
 
     # Collect stocks
-    df_stock = collect_stock('AAPL', start_date, end_date)
+    for symbol in stock_symbols:
+        df_stock = collect_stock(symbol, start_date, end_date)
+        df_stock.to_csv("./data/stock_" + symbol + "_" + start_date + "_" + end_date + ".csv")
 
     # Collect FX
     token = 'd0db1914c54a3c30c73256651cdb4ba76de20324'
-    connection = fxcmpy.fxcmpy(access_token=token, log_level='error')
-    df_fx = collect_fx(connection, start_date=start_date, end_date=end_date)
-    print("="*100 + "DONE" + "="*100)
+    #connection = fxcmpy.fxcmpy(access_token=token, log_level='error')
+    #df_fx = collect_fx(connection, start_date=start_date, end_date=end_date)
+    #print("="*100 + "DONE" + "="*100)

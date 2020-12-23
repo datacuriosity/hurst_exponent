@@ -15,9 +15,12 @@ def hurst(prices, lags):
 
 
 if __name__ == '__main__':
-    start_date = '2010-01-01'
-    end_date = '2020-11-18'
-    apple_stock = collect_stock('AAPL', start_date, end_date)
+    start_date = '2019-01-01'
+    end_date = '2019-12-01'
+
+    stock1 = collect_stock('AMZN', start_date, end_date)
+    stock2 = collect_stock('CRM', start_date, end_date)
+    stock2['ratio'] = stock2['Close'] / stock1['Close']
 
     lags = range(2, 20)
     gbm = np.log(np.cumsum(np.random.randn(100000)) + 1000)         # geometric brownian motion
@@ -27,5 +30,5 @@ if __name__ == '__main__':
     print(f'Hurst GBM: {hurst(gbm, lags)}')
     print(f'Hurst mean-reverting: {hurst(mr, lags)}')
     print(f'Hurst trending: {hurst(tr, lags)}')
-    print(f'Hurst AAPL {hurst(list(apple_stock.Close.to_numpy()), lags)}')
+    print(f'Hurst AAPL {hurst(list(stock1.Close.to_numpy()), lags)}')
 

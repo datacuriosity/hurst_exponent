@@ -15,6 +15,7 @@ class MAcrossover(bt.Strategy):
 
         self.slow_sma = bt.indicators.MovingAverageSimple(self.datas[0], period=self.params.pslow)
         self.fast_sma = bt.indicators.MovingAverageSimple(self.datas[0], period=self.params.pfast)
+        self.qty = 0
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:

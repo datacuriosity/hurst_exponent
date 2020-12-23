@@ -28,8 +28,8 @@ def find_cointegrated_pairs(data, alpha=0.01):
 
 
 if __name__ == '__main__':
-    start_date = '2017-12-01'
-    end_date = '2020-11-18'
+    start_date = '2019-01-01'
+    end_date = '2019-12-01'
 
     # STOCK
     tech_stocks = ['MSTR', 'AMZN', 'GOOGL', 'AAPL', 'CSCO', 'LRCX', 'NTAP', 'IBM', 'NVDA',
