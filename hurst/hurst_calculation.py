@@ -18,7 +18,7 @@ if __name__ == '__main__':
     start_date = '2019-01-01'
     end_date = '2019-12-01'
 
-    stock1 = collect_stock('AMZN', start_date, end_date)
+    stock1 = collect_stock('AAPL', start_date, end_date)
     stock2 = collect_stock('CRM', start_date, end_date)
     stock2['ratio'] = stock2['Close'] / stock1['Close']
 

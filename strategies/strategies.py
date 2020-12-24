@@ -23,14 +23,14 @@ class MAcrossover(bt.Strategy):
 
         if order.status in [order.Completed]:
             if order.isbuy():
-                self.log(f'BUY EXECUTED, {order.executed.price:.2f}')
+                #self.log(f'BUY EXECUTED, {order.executed.price:.2f}')
                 pass
             elif order.issell():
-               self.log(f'SELL EXECUTED, {order.executed.price:.2f}')
+               #self.log(f'SELL EXECUTED, {order.executed.price:.2f}')
                pass
             self.bar_executed = len(self)
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
+            #self.log('Order Canceled/Margin/Rejected')
             pass
 
         self.order = None
@@ -42,14 +42,14 @@ class MAcrossover(bt.Strategy):
         if not self.position:
 
             if self.fast_sma[0] > self.slow_sma[0] and self.fast_sma[-1] < self.slow_sma[-1]:
-                self.log(f'BUY CREATE {self.dataclose[0]:2f}')
+                #self.log(f'BUY CREATE {self.dataclose[0]:2f}')
                 self.order = self.buy()
             elif self.fast_sma[0] < self.slow_sma[0] and self.fast_sma[-1] > self.slow_sma[-1]:
-                self.log(f'SELL CREATE {self.dataclose[0]:2f}')
+                #self.log(f'SELL CREATE {self.dataclose[0]:2f}')
                 self.order = self.sell()
         else:
             if len(self) >= (self.bar_executed + 5):
-                self.log(f'CLOSE CREATE {self.dataclose[0]:2f}')
+                #self.log(f'CLOSE CREATE {self.dataclose[0]:2f}')
                 self.order = self.close()
 
 class PairTradingStrategy(bt.Strategy):
@@ -71,7 +71,7 @@ class PairTradingStrategy(bt.Strategy):
         if self.p.printout:
             dt = dt or self.data.datetime[0]
             dt = bt.num2date(dt)
-            print('%s, %s' % (dt.isoformat(), txt))
+            #print('%s, %s' % (dt.isoformat(), txt))
 
     def notify_order(self, order):
         if order.status in [bt.Order.Submitted, bt.Order.Accepted]:
@@ -80,13 +80,13 @@ class PairTradingStrategy(bt.Strategy):
         if order.status == order.Completed:
             if order.isbuy():
                 buytxt = 'BUY COMPLETE, %.2f' % order.executed.price
-                self.log(buytxt, order.executed.dt)
+                #self.log(buytxt, order.executed.dt)
             else:
                 selltxt = 'SELL COMPLETE, %.2f' % order.executed.price
-                self.log(selltxt, order.executed.dt)
+                #self.log(selltxt, order.executed.dt)
 
         elif order.status in [order.Expired, order.Canceled, order.Margin]:
-            self.log('%s ,' % order.Status[order.status])
+            #self.log('%s ,' % order.Status[order.status])
             pass  # Simply log
 
         # Allow new orders
@@ -115,17 +115,18 @@ class PairTradingStrategy(bt.Strategy):
             return  # if an order is active, no new orders are allowed
 
         if self.p.printout:
-            print('Self  len:', len(self))
-            print('Data0 len:', len(self.data0))
-            print('Data1 len:', len(self.data1))
-            print('Data0 len == Data1 len:',
-                  len(self.data0) == len(self.data1))
+            pass
+            #print('Self  len:', len(self))
+            #print('Data0 len:', len(self.data0))
+            #print('Data1 len:', len(self.data1))
+            #print('Data0 len == Data1 len:',
+                  #len(self.data0) == len(self.data1))
 
-            print('Data0 dt:', self.data0.datetime.datetime())
-            print('Data1 dt:', self.data1.datetime.datetime())
+            #print('Data0 dt:', self.data0.datetime.datetime())
+            #print('Data1 dt:', self.data1.datetime.datetime())
 
-        print('status is', self.status)
-        print('zscore is', self.zscore[0])
+        #print('status is', self.status)
+        #print('zscore is', self.zscore[0])
 
         # Step 2: Check conditions for SHORT & place the order
         # Checking the condition for SHORT
@@ -135,13 +136,13 @@ class PairTradingStrategy(bt.Strategy):
             value = 0.5 * self.portfolio_value  # Divide the cash equally
             x = int(value / (self.data0.close))  # Find the number of shares for Stock1
             y = int(value / (self.data1.close))  # Find the number of shares for Stock2
-            print('x + self.qty1 is', x + self.qty1)
-            print('y + self.qty2 is', y + self.qty2)
+            #print('x + self.qty1 is', x + self.qty1)
+            #print('y + self.qty2 is', y + self.qty2)
 
             # Placing the order
-            self.log('SELL CREATE %s, price = %.2f, qty = %d' % ("PEP", self.data0.close[0], x + self.qty1))
+            #self.log('SELL CREATE %s, price = %.2f, qty = %d' % ("PEP", self.data0.close[0], x + self.qty1))
             self.sell(data=self.data0, size=(x + self.qty1))  # Place an order for buying y + qty2 shares
-            self.log('BUY CREATE %s, price = %.2f, qty = %d' % ("KO", self.data1.close[0], y + self.qty2))
+            #self.log('BUY CREATE %s, price = %.2f, qty = %d' % ("KO", self.data1.close[0], y + self.qty2))
             self.buy(data=self.data1, size=(y + self.qty2))  # Place an order for selling x + qty1 shares
 
             # Updating the counters with new value
@@ -158,13 +159,13 @@ class PairTradingStrategy(bt.Strategy):
             value = 0.5 * self.portfolio_value  # Divide the cash equally
             x = int(value / (self.data0.close))  # Find the number of shares for Stock1
             y = int(value / (self.data1.close))  # Find the number of shares for Stock2
-            print('x + self.qty1 is', x + self.qty1)
-            print('y + self.qty2 is', y + self.qty2)
+            #print('x + self.qty1 is', x + self.qty1)
+            #print('y + self.qty2 is', y + self.qty2)
 
             # Place the order
-            self.log('BUY CREATE %s, price = %.2f, qty = %d' % ("PEP", self.data0.close[0], x + self.qty1))
+            #self.log('BUY CREATE %s, price = %.2f, qty = %d' % ("PEP", self.data0.close[0], x + self.qty1))
             self.buy(data=self.data0, size=(x + self.qty1))  # Place an order for buying x + qty1 shares
-            self.log('SELL CREATE %s, price = %.2f, qty = %d' % ("KO", self.data1.close[0], y + self.qty2))
+            #self.log('SELL CREATE %s, price = %.2f, qty = %d' % ("KO", self.data1.close[0], y + self.qty2))
             self.sell(data=self.data1, size=(y + self.qty2))  # Place an order for selling y + qty2 shares
 
             # Updating the counters with new value

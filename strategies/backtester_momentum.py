@@ -1,8 +1,9 @@
-from strategies import *
 import backtrader as bt
 import datetime
 import os
 import pandas as pd
+from hurst.hurst_calculation import *
+from strategies import *
 
 if __name__ == '__main__':
     results = {}
@@ -10,6 +11,15 @@ if __name__ == '__main__':
     for subdir, dirs, files in os.walk("../data/"):
         for file in files:
             ratios = []
+
+            df = pd.read_csv("../data/" + file)
+            filtered = df[(df['Date'] > '2019-01-01') & (df['Date'] < '2019-12-01')]
+            hurst_val = hurst(filtered['Close'].values, range(2, 20))
+            if hurst_val <= 0.5:
+                print("Skipping as hurst < 0.5 " + file)
+                continue
+            else:
+                print("Calculated Hurst for " + file + " : " + str(hurst_val))
 
             for pfast in range(10, 15):
                 for pslow in range(pfast + 10, pfast * 2):
@@ -21,7 +31,6 @@ if __name__ == '__main__':
                         todate=datetime.datetime(2017, 12, 25),
                     )
 
-                    print(str(pfast)+","+str(pslow))
                     cerebro.adddata(data)
                     cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='sharpe_ratio')
                     cerebro.addsizer(bt.sizers.AllInSizer)
@@ -36,12 +45,17 @@ if __name__ == '__main__':
 
                     end_portfolio_value = cerebro.broker.getvalue()
                     pnl = end_portfolio_value - start_portfolio_value
-                    print(f'Starting Portfolio Value: {start_portfolio_value:2f}')
-                    print(f'Final Portfolio Value: {end_portfolio_value:2f}')
-                    print(f'PnL: {pnl:.2f}')
-                    print(f'Sharpe: {run[0].analyzers.sharpe_ratio.ratio}')
+                    #print(f'Starting Portfolio Value: {start_portfolio_value:2f}')
+                    #print(f'Final Portfolio Value: {end_portfolio_value:2f}')
+                    #print(f'PnL: {pnl:.2f}')
+                    #print(f'Sharpe: {run[0].analyzers.sharpe_ratio.ratio}')
 
-            results[file.split('_')[1]] = sum(ratios) / len(ratios)
+            if len(ratios) > 0:
+                avg_sharpe = sum(ratios) / len(ratios)
+                print(file + " has average sharpe " + str(avg_sharpe))
+                results[file.split('_')[1]] = avg_sharpe
+            else:
+                print("No suitable sharpe found for " + file)
 
     df_results = pd.DataFrame({'Symbol': results.keys(), 'Sharpe Ratio': results.values()})
     df_results.to_csv("momentum_results.csv")

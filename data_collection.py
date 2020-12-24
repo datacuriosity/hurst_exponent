@@ -69,7 +69,8 @@ def collect_fx(connection, ccy_pair='USD/JPY', start_date='2000-01-01', end_date
     return new_df
 
 if __name__ == '__main__':
-    stock_symbols = ['AAPL', 'TSLA']
+    stock_symbols = ['MSTR', 'AMZN', 'GOOGL', 'AAPL', 'CSCO', 'LRCX', 'NTAP', 'IBM', 'NVDA',
+                   'MSFT', 'CRM', 'ORCL', 'SAP', 'SWKS', 'SYNA', 'TSM', 'VIAV', 'TSLA']
     crypto_symbols = ['LTC/BTC']
 
     start_date = '2000-01-01'
