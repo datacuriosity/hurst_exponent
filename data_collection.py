@@ -7,7 +7,6 @@ import numpy as np
 from config.config import *
 #import plotly.graph_objects as go
 
-
 def collect_crypto(id, time_frame='1d', trading_pair='LTC/BTC', start_date='2010-01-01', end_date='2020-11-17'):
     """
     Fetch OHLCV for cryptocurrencies
@@ -43,13 +42,14 @@ def collect_crypto(id, time_frame='1d', trading_pair='LTC/BTC', start_date='2010
     df_final.columns = ['Open', 'High', 'Low', 'Close', 'Volume']
     df_final['Adj Close'] = df_final['Close']
     df_final = df_final[['Open', 'High', 'Low', 'Close','Adj Close', 'Volume']]
+    df_final.index.name = 'Date'
+    df_final = df_final.dropna()
     return df_final
-
 
 def collect_stock(tickers, start_date='2020-01-01', end_date='2020-11-08'):
     df = yf.download(tickers, start=start_date, end=end_date, progress=False)
+    df = df.dropna()
     return df
-
 
 def collect_fx(connection, ccy_pair='USD/JPY', start_date='2000-01-01', end_date='2020-10-18'):
     """
@@ -67,26 +67,25 @@ def collect_fx(connection, ccy_pair='USD/JPY', start_date='2000-01-01', end_date
     df['Close'] = (df.bidclose + df.askclose) / 2
     df['Volume'] = df.tickqty
     new_df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
+    new_df = new_df.dropna()
     return new_df
 
 if __name__ == '__main__':
     start_date = '2000-01-01'
     end_date = '2020-11-18'
-    # Collect crypto
-    id = ccxt.binance()
+
+    # Collect FX
+    # TODO to fix once server is backup
+    #token = 'd0db1914c54a3c30c73256651cdb4ba76de20324'
+    #connection = fxcmpy.fxcmpy(access_token=token, log_level='error')
+    #df_fx = collect_fx(connection, start_date=start_date, end_date=end_date)
 
     # collect crypto
     for symbol in CRYPTO_SYMBOLS:
-        df_crypto = collect_crypto(id, trading_pair=symbol, start_date=start_date, end_date=end_date)
+        df_crypto = collect_crypto(ccxt.binance(), trading_pair=symbol, start_date=start_date, end_date=end_date)
         df_crypto.to_csv("./data/crypto_" + symbol.replace("/", "-") + "_" + start_date + "_" + end_date + ".csv")
 
     # Collect stocks
     for symbol in STOCK_SYMBOLS:
         df_stock = collect_stock(symbol, start_date, end_date)
         df_stock.to_csv("./data/stock_" + symbol + "_" + start_date + "_" + end_date + ".csv")
-
-    # Collect FX
-    token = 'd0db1914c54a3c30c73256651cdb4ba76de20324'
-    #connection = fxcmpy.fxcmpy(access_token=token, log_level='error')
-    #df_fx = collect_fx(connection, start_date=start_date, end_date=end_date)
-    #print("="*100 + "DONE" + "="*100)

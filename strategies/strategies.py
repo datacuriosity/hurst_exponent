@@ -176,10 +176,8 @@ class PairTradingStrategy(bt.Strategy):
 
             # Step 4: Check conditions for No Trade
             # If the z-score is within the two bounds, close all
-        """
         elif (self.zscore[0] < self.up_medium and self.zscore[0] > self.low_medium):
             self.log('CLOSE LONG %s, price = %.2f' % ("PEP", self.data0.close[0]))
             self.close(self.data0)
             self.log('CLOSE LONG %s, price = %.2f' % ("KO", self.data1.close[0]))
             self.close(self.data1)
-        """
