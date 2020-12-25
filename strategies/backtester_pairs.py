@@ -1,10 +1,11 @@
 from strategies import *
 import backtrader as bt
-import datetime
+from datetime import datetime
 import os
 import pandas as pd
 from hurst.pair_stocks import *
 from hurst.hurst_calculation import *
+from config.config import *
 
 if __name__ == '__main__':
     data = {}
@@ -13,7 +14,7 @@ if __name__ == '__main__':
     for subdir, dirs, files in os.walk("../data/"):
         for file in files:
             df_cur = pd.read_csv("../data/" + file)
-            filtered = df_cur[(df_cur['Date'] > '2019-01-01') & (df_cur['Date'] < '2019-12-01')]
+            filtered = df_cur[(df_cur['Date'] > TRAIN_START_DATE) & (df_cur['Date'] < TRAIN_END_DATE)]
             df[file.split('_')[1]] = filtered['Close'].values
             data.setdefault(file.split("_")[0], []).append(file)
 
@@ -25,10 +26,10 @@ if __name__ == '__main__':
                 continue
 
             df1 = pd.read_csv("../data/" + file1)
-            filtered1 = df1[(df1['Date'] > '2019-01-01') & (df1['Date'] < '2019-12-01')]
+            filtered1 = df1[(df1['Date'] > TRAIN_START_DATE) & (df1['Date'] < TRAIN_END_DATE)]
 
             df2 = pd.read_csv("../data/" + file2)
-            filtered2 = df2[(df2['Date'] > '2019-01-01') & (df2['Date'] < '2019-12-01')]
+            filtered2 = df2[(df2['Date'] > TRAIN_START_DATE) & (df2['Date'] < TRAIN_END_DATE)]
 
             df2['ratio'] = df1['Close']/df2['Close']
             hurst_val = hurst(df2['ratio'].values, range(2, 20))
@@ -51,14 +52,14 @@ if __name__ == '__main__':
 
             data1 = bt.feeds.YahooFinanceCSVData(
                 dataname='../data/' + file1,
-                fromdate=datetime.datetime(2016, 1, 1),
-                todate=datetime.datetime(2017, 12, 25),
+                fromdate=datetime.strptime(TEST_START_DATE, '%Y-%M-%d'),
+                todate=datetime.strptime(TEST_END_DATE, '%Y-%M-%d'),
             )
 
             data2 = bt.feeds.YahooFinanceCSVData(
                 dataname='../data/' + file2,
-                fromdate=datetime.datetime(2016, 1, 1),
-                todate=datetime.datetime(2017, 12, 25),
+                fromdate=datetime.strptime(TEST_START_DATE, '%Y-%M-%d'),
+                todate=datetime.strptime(TEST_END_DATE, '%Y-%M-%d'),
             )
 
             cerebro.adddata(data1)

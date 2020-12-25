@@ -1,9 +1,10 @@
 import backtrader as bt
-import datetime
+from datetime import datetime
 import os
 import pandas as pd
 from hurst.hurst_calculation import *
 from strategies import *
+from config.config import *
 
 if __name__ == '__main__':
     results = {}
@@ -13,7 +14,7 @@ if __name__ == '__main__':
             ratios = []
 
             df = pd.read_csv("../data/" + file)
-            filtered = df[(df['Date'] > '2019-01-01') & (df['Date'] < '2019-12-01')]
+            filtered = df[(df['Date'] > TRAIN_START_DATE) & (df['Date'] < TRAIN_END_DATE)]
             hurst_val = hurst(filtered['Close'].values, range(2, 20))
             if hurst_val <= 0.5:
                 print("Skipping as hurst < 0.5 " + file)
@@ -21,14 +22,14 @@ if __name__ == '__main__':
             else:
                 print("Calculated Hurst for " + file + " : " + str(hurst_val))
 
-            for pfast in range(10, 15):
+            for pfast in range(10, 40):
                 for pslow in range(pfast + 10, pfast * 2):
                     cerebro = bt.Cerebro()
 
                     data = bt.feeds.YahooFinanceCSVData(
                         dataname='../data/' + file,
-                        fromdate=datetime.datetime(2016, 1, 1),
-                        todate=datetime.datetime(2017, 12, 25),
+                        fromdate=datetime.strptime(TEST_START_DATE, '%Y-%M-%d'),
+                        todate=datetime.strptime(TEST_END_DATE, '%Y-%M-%d'),
                     )
 
                     cerebro.adddata(data)

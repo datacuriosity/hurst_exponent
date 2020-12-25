@@ -4,6 +4,7 @@ import fxcmpy
 import yfinance as yf
 import pandas as pd
 import numpy as np
+from config.config import *
 #import plotly.graph_objects as go
 
 
@@ -69,22 +70,18 @@ def collect_fx(connection, ccy_pair='USD/JPY', start_date='2000-01-01', end_date
     return new_df
 
 if __name__ == '__main__':
-    stock_symbols = ['MSTR', 'AMZN', 'GOOGL', 'AAPL', 'CSCO', 'LRCX', 'NTAP', 'IBM', 'NVDA',
-                   'MSFT', 'CRM', 'ORCL', 'SAP', 'SWKS', 'SYNA', 'TSM', 'VIAV', 'TSLA']
-    crypto_symbols = ['LTC/BTC']
-
     start_date = '2000-01-01'
     end_date = '2020-11-18'
     # Collect crypto
     id = ccxt.binance()
 
     # collect crypto
-    for symbol in crypto_symbols:
+    for symbol in CRYPTO_SYMBOLS:
         df_crypto = collect_crypto(id, trading_pair=symbol, start_date=start_date, end_date=end_date)
         df_crypto.to_csv("./data/crypto_" + symbol.replace("/", "-") + "_" + start_date + "_" + end_date + ".csv")
 
     # Collect stocks
-    for symbol in stock_symbols:
+    for symbol in STOCK_SYMBOLS:
         df_stock = collect_stock(symbol, start_date, end_date)
         df_stock.to_csv("./data/stock_" + symbol + "_" + start_date + "_" + end_date + ".csv")
 
