@@ -6,6 +6,7 @@ import pandas as pd
 from hurst.pair_stocks import *
 from hurst.hurst_calculation import *
 from config.config import *
+import sys
 
 SPREAD_LOWER_LIMIT = 1
 SPREAD_UPPER_LIMIT = 6
@@ -61,7 +62,8 @@ def calculateRatioSeries(file1, file2):
     df2 = pd.read_csv("../data/" + file2)
     filtered2 = df2[(df2['Date'] > TRAIN_START_DATE) & (df2['Date'] < TRAIN_END_DATE)]
 
-    return filtered1['Close'].values / filtered2['Close'].values
+    intersect = filtered1.index.intersection(filtered2.index)
+    return filtered1.loc[intersect]['Close'].values / filtered2.loc[intersect]['Close'].values
 
 def calculateHurst(values, pair):
     hurst_val = hurst(values, range(HURST_LAG_LOWER_LIMIT, HURST_LAG_UPPER_LIMIT))
@@ -73,19 +75,28 @@ def calculateHurst(values, pair):
         return hurst_val
 
 def groupFilesByAssetType(asset, file_by_asset_type):
-    df = pd.DataFrame()
+    merged = pd.DataFrame()
+
     for subdir, dirs, files in os.walk("../data/"):
         for file in files:
             if asset not in file:
                 continue
             df_cur = pd.read_csv("../data/" + file)
             filtered = df_cur[(df_cur['Date'] > TRAIN_START_DATE) & (df_cur['Date'] < TRAIN_END_DATE)]
+            filtered[file.split('_')[1]] = filtered['Close']
             if filtered.empty:
                 print("Skipping " + file + "as frame is empty after filtering by date.")
                 continue
-            df[file.split('_')[1]] = filtered['Close'].values
+
+            if merged.empty:
+                merged['Date'] = filtered['Date']
+                merged.set_index('Date')
+                merged[file.split('_')[1]] = filtered['Close']
+            else:
+                merged = merged.merge(filtered[['Date', file.split('_')[1]]], on=['Date'], how='inner')
             file_by_asset_type.setdefault(file.split("_")[0], []).append(file)
-    return df
+
+    return merged
 
 def getResults(asset):
     file_by_asset_type = {}
@@ -93,6 +104,9 @@ def getResults(asset):
     hurst_by_asset = {}
 
     df = groupFilesByAssetType(asset, file_by_asset_type)
+    if asset not in file_by_asset_type:
+        return
+    del df["Date"]
     scores, p_values, cointegrated_pairs = find_cointegrated_pairs(df)
 
     for i, file1 in enumerate(file_by_asset_type[asset]):
@@ -131,3 +145,4 @@ def getResults(asset):
 if __name__ == '__main__':
     getResults('stock')
     getResults('crypto')
+    getResults('fx')

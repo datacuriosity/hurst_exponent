@@ -86,3 +86,4 @@ def getResults(asset):
 if __name__ == '__main__':
     getResults("stock")
     getResults("crypto")
+    getResults("fx")
