@@ -7,9 +7,10 @@ from hurst.pair_stocks import *
 from hurst.hurst_calculation import *
 from config.config import *
 import sys
+import time
 
-SPREAD_LOWER_LIMIT = 1
-SPREAD_UPPER_LIMIT = 6
+SPREAD_LOWER_LIMIT = 2
+SPREAD_UPPER_LIMIT = 3
 
 def calculateAverageSharpeRatio(ratios, pair, average_sharpe_by_asset, hurst_table, hurst_val):
     if len(ratios) > 0:
@@ -62,8 +63,8 @@ def calculateRatioSeries(file1, file2):
     df2 = pd.read_csv("../data/" + file2)
     filtered2 = df2[(df2['Date'] > TRAIN_START_DATE) & (df2['Date'] < TRAIN_END_DATE)]
 
-    intersect = filtered1.index.intersection(filtered2.index)
-    return filtered1.loc[intersect]['Close'].values / filtered2.loc[intersect]['Close'].values
+    merged = filtered1.merge(filtered2, on="Date", how="inner")
+    return (merged['Close_x'] / merged['Close_y']).values
 
 def calculateHurst(values, pair):
     hurst_val = hurst(values, range(HURST_LAG_LOWER_LIMIT, HURST_LAG_UPPER_LIMIT))
@@ -107,36 +108,30 @@ def getResults(asset):
     if asset not in file_by_asset_type:
         return
     del df["Date"]
+    print("Finding all pairs which are co-integrated...")
+    start = time.time()
     scores, p_values, cointegrated_pairs = find_cointegrated_pairs(df)
+    print("Found a total of " + str(len(cointegrated_pairs)) + " pairs. Took " + str(time.time() - start) + " seconds.")
 
-    for i, file1 in enumerate(file_by_asset_type[asset]):
-        for j, file2 in enumerate(file_by_asset_type[asset]):
-            if i == j:
+    for symbol1, symbol2 in cointegrated_pairs:
+        file1 = asset + "_" + symbol1 + "_" + COLLECT_START_DATE + "_" + COLLECT_END_DATE + ".csv"
+        file2 = asset + "_" + symbol2 + "_" + COLLECT_START_DATE + "_" + COLLECT_END_DATE + ".csv"
+        pair = symbol1 + "/" + symbol2
+
+        try:
+            ratio = calculateRatioSeries(file1, file2)
+            hurst_val = calculateHurst(ratio, pair)
+
+            # Check if the pair is anti-persistent
+            if hurst_val == -1:
                 continue
 
-            symbol1 = file1.split('_')[1]
-            symbol2 = file2.split('_')[1]
-            pair = symbol1 + "/" + symbol2
+            sharpe_ratios = []
 
-            try:
-                ratio = calculateRatioSeries(file1, file2)
-                hurst_val = calculateHurst(ratio, pair)
-
-                # Check if the pair is anti-persistent
-                if hurst_val == -1:
-                    continue
-
-                # Check if the pair is co-integrated
-                if (symbol1, symbol2) not in cointegrated_pairs and (symbol2, symbol1) not in cointegrated_pairs:
-                    print("Skipping pair " + pair + " as it is not found to be cointegrated")
-                    continue
-
-                sharpe_ratios = []
-
-                for spread_limit in range(SPREAD_LOWER_LIMIT, SPREAD_UPPER_LIMIT):
-                    runBacktest(spread_limit, file1, file2, sharpe_ratios)
-                calculateAverageSharpeRatio(sharpe_ratios, pair, average_sharpe_by_asset, hurst_by_asset, hurst_val)
-            except Exception as e:
+            for spread_limit in range(SPREAD_LOWER_LIMIT, SPREAD_UPPER_LIMIT):
+                runBacktest(spread_limit, file1, file2, sharpe_ratios)
+            calculateAverageSharpeRatio(sharpe_ratios, pair, average_sharpe_by_asset, hurst_by_asset, hurst_val)
+        except Exception as e:
                 print("Skipping pair " + pair + " as exception was found " + str(e))
 
     df_results = pd.DataFrame({'Symbol': average_sharpe_by_asset.keys(), 'Sharpe Ratio': average_sharpe_by_asset.values(), 'Hurst': hurst_by_asset.values()})

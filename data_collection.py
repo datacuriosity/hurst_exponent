@@ -65,16 +65,17 @@ def collect_fx(connection, ccy_pair='USD/JPY', start_date='2000-01-01', end_date
     df['High'] = (df.bidhigh + df.askhigh) / 2
     df['Low'] = (df.bidlow + df.asklow) / 2
     df['Close'] = (df.bidclose + df.askclose) / 2
+    df['Adj Close'] = df['Close']
     df['Volume'] = df.tickqty
-    new_df = df[['Open', 'High', 'Low', 'Close', 'Volume']].copy()
+    new_df = df[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']].copy()
 
     new_df.index.name = 'Date'
     new_df = new_df.dropna()
     return new_df
 
 if __name__ == '__main__':
-    start_date = '2001-11-27'
-    end_date = '2020-11-17'
+    start_date = COLLECT_START_DATE
+    end_date = COLLECT_END_DATE
 
     # Collect FX
     token = 'f561988f2a6a49b2523a6a3094dacb8920879fa9'
