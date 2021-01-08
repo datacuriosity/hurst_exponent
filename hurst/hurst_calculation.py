@@ -1,6 +1,8 @@
 from data_collection import collect_stock
 import numpy as np
-
+import fathon
+from fathon import fathonUtils as fu
+from nolds import hurst_rs
 
 def hurst(prices, lags):
 
@@ -15,7 +17,7 @@ def hurst(prices, lags):
 
 
 if __name__ == '__main__':
-    start_date = '2019-01-01'
+    start_date = '2018-01-01'
     end_date = '2019-12-01'
 
     stock1 = collect_stock('AAPL', start_date, end_date)
@@ -31,4 +33,9 @@ if __name__ == '__main__':
     print(f'Hurst mean-reverting: {hurst(mr, lags)}')
     print(f'Hurst trending: {hurst(tr, lags)}')
     print(f'Hurst AAPL {hurst(list(stock1.Close.to_numpy()), lags)}')
+
+    print(hurst_rs(gbm, lags, fit='poly', unbiased=True))
+
+    print("-"*100)
+
 
