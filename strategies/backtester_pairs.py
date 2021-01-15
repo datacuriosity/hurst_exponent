@@ -12,6 +12,7 @@ import time
 SPREAD_LOWER_LIMIT = 2
 SPREAD_UPPER_LIMIT = 3
 
+
 def calculateAverageSharpeRatio(ratios, pair, average_sharpe_by_asset, hurst_table, hurst_val):
     if len(ratios) > 0:
         avg_sharpe = sum(ratios) / len(ratios)
@@ -86,7 +87,7 @@ def groupFilesByAssetType(asset, file_by_asset_type):
             filtered = df_cur[(df_cur['Date'] > TRAIN_START_DATE) & (df_cur['Date'] < TRAIN_END_DATE)]
             filtered[file.split('_')[1]] = filtered['Close']
             if filtered.empty:
-                print("Skipping " + file + "as frame is empty after filtering by date.")
+                print("Skipping " + file + " as frame is empty after filtering by date.")
                 continue
 
             if merged.empty:

@@ -78,7 +78,7 @@ if __name__ == '__main__':
     end_date = COLLECT_END_DATE
 
     # Collect FX
-    token = 'f561988f2a6a49b2523a6a3094dacb8920879fa9'
+    token = '36badda0414a345a4af0132c13789e2cc31c822e'
     connection = fxcmpy.fxcmpy(access_token=token, log_level='error')
 
     for symbol in FX_SYMBOLS:
