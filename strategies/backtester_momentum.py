@@ -49,7 +49,8 @@ def runBacktest(pfast, pslow, file, ratios):
 def calculateHurst(file):
     df = pd.read_csv("../data/" + file)
     filtered = df[(df['Date'] > TRAIN_START_DATE) & (df['Date'] < TRAIN_END_DATE)]
-    hurst_val = hurst(filtered['Close'].values, range(HURST_LAG_LOWER_LIMIT, HURST_LAG_UPPER_LIMIT))
+    # log_return = np.log(filtered.Close / filtered.Close.shift(1)).dropna()
+    hurst_val = hurst(filtered.Close.values, range(HURST_LAG_LOWER_LIMIT, HURST_LAG_UPPER_LIMIT))
     if hurst_val <= 0.5:
         print("Skipping as hurst < 0.5 " + file)
         return -1

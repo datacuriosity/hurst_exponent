@@ -8,6 +8,7 @@ from hurst.hurst_calculation import *
 from config.config import *
 import sys
 import time
+import numpy as np
 
 SPREAD_LOWER_LIMIT = 2
 SPREAD_UPPER_LIMIT = 3
@@ -65,7 +66,12 @@ def calculateRatioSeries(file1, file2):
     filtered2 = df2[(df2['Date'] > TRAIN_START_DATE) & (df2['Date'] < TRAIN_END_DATE)]
 
     merged = filtered1.merge(filtered2, on="Date", how="inner")
-    return (merged['Close_x'] / merged['Close_y']).values
+
+    b = np.std(np.log(df1.Close / df1.Close.shift(1))) / np.std(np.log(df2.Close / df2.Close.shift(1)))
+
+    return (np.log(merged['Close_x']) - b * np.log(merged['Close_y'])).values
+    # return (merged['Close_x'] / merged['Close_y']).values
+
 
 def calculateHurst(values, pair):
     hurst_val = hurst(values, range(HURST_LAG_LOWER_LIMIT, HURST_LAG_UPPER_LIMIT))
