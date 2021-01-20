@@ -5,7 +5,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from config.config import *
-#import plotly.graph_objects as go
+
 
 def collect_crypto(id, time_frame='1d', trading_pair='LTC/BTC', start_date='2010-01-01', end_date='2020-11-17'):
     """

@@ -1,5 +1,4 @@
 import numpy as np
-from nolds import dfa, logarithmic_n
 from data_collection import collect_stock
 
 
@@ -46,7 +45,7 @@ if __name__ == '__main__':
     tr = np.log(np.cumsum(np.random.randn(100000) + 1) + 1000)             # treding series
     price = stock1.Close.to_numpy()
 
-    print(f'Hurst GBM: {dfa(gbm)}')
-    print(f'Hurst mean-reverting: {dfa(mr)}')
-    print(f'Hurst trending: {dfa(tr)}')
-    print(f'Hurst AAPL {dfa(stock1.Close.to_numpy())}')
+    print(f'Hurst GBM: {dfa_coef(gbm)}')
+    print(f'Hurst mean-reverting: {dfa_coef(mr)}')
+    print(f'Hurst trending: {dfa_coef(tr)}')
+    print(f'Hurst AAPL {dfa_coef(stock1.Close.to_numpy())}')

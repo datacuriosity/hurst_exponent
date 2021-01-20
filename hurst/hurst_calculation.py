@@ -1,19 +1,5 @@
 from data_collection import collect_stock
 import numpy as np
-import fathon
-from fathon import fathonUtils as fu
-import matplotlib.pyplot as plt
-
-# def hurst(prices, lags):
-#
-#     # Calculate the array of the variances of the lagged differences
-#     tau = [np.sqrt(np.std(np.subtract(prices[lag:], prices[:-lag]))) for lag in lags]
-#
-#     # Use a linear fit to estimate the Hurst Exponent
-#     poly = np.polyfit(np.log(lags), np.log(tau), 1)
-#
-#     # Return the Hurst exponent from the polyfit output
-#     return poly[0]*2.0
 
 def hurst(prices, lags):
     tau = []

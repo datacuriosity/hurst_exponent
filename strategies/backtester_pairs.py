@@ -2,11 +2,9 @@ from strategies import *
 import backtrader as bt
 from datetime import datetime
 import os
-import pandas as pd
 from hurst.pair_stocks import *
 from hurst.hurst_calculation import *
 from config.config import *
-import sys
 import time
 import numpy as np
 
